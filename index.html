@@ -4,169 +4,238 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lumora AI — Create Something Amazing</title>
+<title>Lumora AI</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box}
-body{margin:0;font-family:Inter,Arial,sans-serif;background:#f7f5ff;color:#25213b}
-header{padding:20px 7%;display:flex;justify-content:space-between;align-items:center;background:white}
-.logo{font-size:26px;font-weight:800;color:#7356d9}
-.credits{background:#eee8ff;padding:11px 18px;border-radius:30px;color:#6949ca;font-weight:700}
-main{max-width:1050px;margin:55px auto;padding:0 22px}
-.hero{text-align:center;margin-bottom:35px}
-h1{font-size:43px;margin:10px 0;color:#292044}
-.hero p{color:#77718d;font-size:17px}
-.panel{background:white;border-radius:22px;padding:28px;box-shadow:0 10px 35px #39266b0d;margin-bottom:25px}
-label{display:block;font-weight:700;margin:18px 0 9px}
-textarea,select{width:100%;padding:15px;border:1px solid #e4dff1;border-radius:12px;font:inherit;background:#fcfbff}
-textarea{height:125px;resize:vertical}
-button{border:0;border-radius:12px;padding:15px 22px;font-size:15px;font-weight:700;cursor:pointer}
-.primary{background:#7859df;color:white;width:100%;margin-top:20px}
-.primary:hover{background:#6242c9}
-.secondary{background:#eee8ff;color:#6949ca}
+body{margin:0;background:#f7f5ff;color:#29213e;font-family:Arial,sans-serif}
+header{background:white;padding:20px 7%;display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:27px;font-weight:bold;color:#7655d9}
+main{max-width:850px;margin:45px auto;padding:0 20px}
+.card{background:white;border-radius:20px;padding:28px;margin-bottom:22px;box-shadow:0 8px 30px #39266b0d}
+h1{text-align:center;font-size:38px}
+.subtitle{text-align:center;color:#817995}
+input,textarea,select{width:100%;padding:14px;margin:9px 0 16px;border:1px solid #ddd6ee;border-radius:10px;font-size:15px}
+button{padding:14px 20px;border:0;border-radius:10px;background:#7859dc;color:white;font-weight:bold;cursor:pointer}
 button:disabled{opacity:.5;cursor:not-allowed}
-.info{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;color:#77718d;font-size:14px;margin-top:12px}
-.result{display:none;background:#f4f0ff;padding:22px;border-radius:14px;margin-top:20px}
-.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}
-.plan{border:1px solid #e7e0f6;border-radius:16px;padding:22px;text-align:center}
-.plan h3{color:#7154d5}
-.price{font-size:29px;font-weight:800;margin:15px 0}
-.plan p{color:#77718d}
-.plan button{width:100%;background:#eee8ff;color:#6749c6}
-.note{font-size:13px;color:#827c94;text-align:center;margin:25px 0}
-footer{text-align:center;padding:30px;color:#89839b}
-@media(max-width:650px){.plans{grid-template-columns:1fr}h1{font-size:32px}main{margin:35px auto}}
+.full{width:100%}
+.secondary{background:#eee8ff;color:#6949c9}
+.hidden{display:none}
+.balance{background:#eee8ff;color:#6949c9;padding:15px;border-radius:12px;font-size:20px;font-weight:bold}
+.message{padding:12px;background:#f3efff;border-radius:10px;margin-top:15px}
+.small{font-size:13px;color:#827b91}
+.tabs{display:flex;gap:10px;margin-bottom:15px}
 </style>
 </head>
 <body>
 
 <header>
   <div class="logo">✦ Lumora AI</div>
-  <div class="credits">✦ <span id="creditCount">30</span> credits</div>
+  <button id="logout" class="secondary hidden">Log out</button>
 </header>
 
 <main>
-  <section class="hero">
-    <h1>Your ideas. Your videos. ✨</h1>
-    <p>Turn your imagination into amazing videos with AI.</p>
-  </section>
+  <h1>Your ideas. Your videos. ✨</h1>
+  <p class="subtitle">Create something amazing with Lumora AI.</p>
 
-  <section class="panel">
-    <h2>Create your video</h2>
-    <p>Describe the video you want Lumora to create.</p>
-
-    <label for="prompt">Your video idea</label>
-    <textarea id="prompt" placeholder="Example: Create a beautiful promotional video for a flower shop..."></textarea>
-
-    <label for="style">Video style</label>
-    <select id="style">
-      <option>Cinematic</option>
-      <option>Realistic</option>
-      <option>Animated</option>
-      <option>Business advertisement</option>
-      <option>Educational</option>
-      <option>Islamic reminder</option>
-      <option>Social media</option>
-    </select>
-
-    <label for="duration">Video length</label>
-    <select id="duration">
-      <option value="5">5 seconds — 25 credits</option>
-      <option value="10">10 seconds — 40 credits</option>
-      <option value="15">15 seconds — 60 credits</option>
-      <option value="30">30 seconds — 100 credits</option>
-    </select>
-
-    <div class="info">
-      <span id="cost">Cost: 25 credits</span>
-      <span>Starting balance: 30 credits</span>
+  <section id="authArea" class="card">
+    <div class="tabs">
+      <button id="showLogin" class="secondary">Log in</button>
+      <button id="showSignup">Sign up</button>
     </div>
 
-    <button class="primary" id="generate">✦ Generate my video</button>
+    <h2 id="authTitle">Welcome back!</h2>
 
-    <div class="result" id="result"></div>
+    <form id="authForm">
+      <label>Email address</label>
+      <input id="email" type="email" placeholder="Enter your email" required>
+
+      <label>Password</label>
+      <input id="password" type="password" placeholder="Enter your password" minlength="6" required>
+
+      <button id="authButton" class="full">Log in</button>
+    </form>
+    <div id="authMessage" class="message hidden"></div>
+    <p class="small">Your account and credit balance are stored securely in your Lumora database.</p>
   </section>
 
-  <section class="panel" id="plans">
-    <h2>Get more credits</h2>
-    <p>Keep creating with a plan that suits you.</p>
-
-    <div class="plans">
-      <div class="plan">
-        <h3>Starter</h3>
-        <div class="price">AED 19</div>
-        <p>100 credits</p>
-        <button onclick="choosePlan('Starter')">Choose plan</button>
-      </div>
-      <div class="plan">
-        <h3>Creator</h3>
-        <div class="price">AED 49</div>
-        <p>300 credits</p>
-        <button onclick="choosePlan('Creator')">Choose plan</button>
-      </div>
-      <div class="plan">
-        <h3>Pro</h3>
-        <div class="price">AED 99</div>
-        <p>800 credits</p>
-        <button onclick="choosePlan('Pro')">Choose plan</button>
-      </div>
+  <section id="dashboard" class="hidden">
+    <div class="card">
+      <h2>Your Lumora account</h2>
+      <p id="welcome"></p>
+      <div class="balance">✦ <span id="credits">--</span> credits available</div>
+      <p class="small">New customers receive 30 free credits.</p>
+      <button id="refresh" class="secondary">Refresh balance</button>
     </div>
-    <p class="note">No advertisements. Just creativity.</p>
+
+    <div class="card">
+      <h2>Create a video</h2>
+      <label>Describe your video idea</label>
+      <textarea id="prompt" rows="5" placeholder="Describe the video you want to create..."></textarea>
+
+      <label>Video style</label>
+      <select id="style">
+        <option>Cinematic</option>
+        <option>Realistic</option>
+        <option>Animated</option>
+        <option>Business advertisement</option>
+        <option>Educational</option>
+        <option>Islamic reminder</option>
+        <option>Social media</option>
+      </select>
+
+      <p class="small">Video generation is being connected. Your credits will not be charged during this setup.</p>
+      <button class="full" disabled>AI video generation coming soon</button>
+    </div>
+
+    <div id="dashboardMessage" class="message hidden"></div>
   </section>
 </main>
 
-<footer>© 2026 Lumora AI · Create without limits to your imagination.</footer>
-
 <script>
-let credits = Number(localStorage.getItem("lumoraCredits"));
-if (!Number.isFinite(credits) || credits < 0) credits = 30;
+const SUPABASE_URL = "https://mlvbspwzwvynpremehel.supabase.co";
+const SUPABASE_KEY = "sb_publishable_-oc4IXGH5eEjyom6MgJTjQ_J0rQPhaZ";
 
-const creditCount = document.getElementById("creditCount");
-const duration = document.getElementById("duration");
-const cost = document.getElementById("cost");
-const generate = document.getElementById("generate");
-const result = document.getElementById("result");
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-function updateCredits(){
-  creditCount.textContent = credits;
-  localStorage.setItem("lumoraCredits", credits);
-  const prices = {"5":25,"10":40,"15":60,"30":100};
-  cost.textContent = "Cost: " + prices[duration.value] + " credits";
+let signupMode = false;
+
+const authArea = document.getElementById("authArea");
+const dashboard = document.getElementById("dashboard");
+const authMessage = document.getElementById("authMessage");
+const dashboardMessage = document.getElementById("dashboardMessage");
+const logoutButton = document.getElementById("logout");
+
+function showMessage(element, message) {
+  element.textContent = message;
+  element.classList.remove("hidden");
 }
 
-duration.addEventListener("change", updateCredits);
+function hideMessage(element) {
+  element.classList.add("hidden");
+}
 
-generate.addEventListener("click", () => {
-  const prompt = document.getElementById("prompt").value.trim();
-  const prices = {"5":25,"10":40,"15":60,"30":100};
-  const price = prices[duration.value];
+function setMode(signup) {
+  signupMode = signup;
+  document.getElementById("authTitle").textContent =
+    signup ? "Create your account" : "Welcome back!";
+  document.getElementById("authButton").textContent =
+    signup ? "Create account" : "Log in";
+  document.getElementById("showSignup").className =
+    signup ? "" : "secondary";
+  document.getElementById("showLogin").className =
+    signup ? "secondary" : "";
+  hideMessage(authMessage);
+}
 
-  if(!prompt){
-    alert("Please describe your video idea first.");
+document.getElementById("showLogin").onclick = () => setMode(false);
+document.getElementById("showSignup").onclick = () => setMode(true);
+
+async function loadProfile(user) {
+  authArea.classList.add("hidden");
+  dashboard.classList.remove("hidden");
+  logoutButton.classList.remove("hidden");
+
+  document.getElementById("welcome").textContent =
+    "Signed in as " + user.email;
+
+  hideMessage(dashboardMessage);
+
+  const { data, error } = await db
+    .from("profiles")
+    .select("credits")
+    .eq("id", user.id)
+    .single();
+
+  if (error) {
+    document.getElementById("credits").textContent = "--";
+    showMessage(dashboardMessage,
+      "We couldn't load your credits yet. Please refresh or contact support.");
     return;
   }
 
-  if(credits < price){
-    result.style.display = "block";
-    result.innerHTML = "<h3>You're out of credits!</h3><p>You need " + price + " credits, but you have " + credits + ".</p><p>Choose a plan below to continue creating.</p><button class='secondary' onclick=\"document.getElementById('plans').scrollIntoView({behavior:'smooth'})\">View plans</button>";
+  document.getElementById("credits").textContent = data.credits;
+}
+
+async function checkSession() {
+  const { data, error } = await db.auth.getSession();
+  if (error) {
+    showMessage(authMessage, error.message);
     return;
   }
 
-  result.style.display = "block";
-  result.innerHTML = "<h3>Demo preview request</h3><p>Your video idea has been received by this demo.</p><p><b>Idea:</b> " + escapeHTML(prompt) + "</p><p><b>Style:</b> " + escapeHTML(document.getElementById("style").value) + "</p><p><b>Length:</b> " + duration.value + " seconds</p><p>Real AI video generation will be connected next.</p>";
+  if (data.session) {
+    await loadProfile(data.session.user);
+  } else {
+    authArea.classList.remove("hidden");
+    dashboard.classList.add("hidden");
+    logoutButton.classList.add("hidden");
+  }
+}
+
+document.getElementById("authForm").addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const button = document.getElementById("authButton");
+
+  button.disabled = true;
+  button.textContent = "Please wait...";
+  hideMessage(authMessage);
+
+  try {
+    if (signupMode) {
+      const { data, error } = await db.auth.signUp({
+        email,
+        password
+      });
+
+      if (error) throw error;
+
+      if (data.session) {
+        await loadProfile(data.session.user);
+      } else {
+        showMessage(authMessage,
+          "Account created! Please check your email to confirm your account, then log in.");
+      }
+    } else {
+      const { data, error } = await db.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) throw error;
+      await loadProfile(data.user);
+    }
+  } catch (error) {
+    showMessage(authMessage, error.message);
+  } finally {
+    button.disabled = false;
+    button.textContent = signupMode ? "Create account" : "Log in";
+  }
 });
 
-function escapeHTML(text){
-  return text.replace(/[&<>"']/g, c => ({
-    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-  })[c]);
-}
+document.getElementById("refresh").onclick = async () => {
+  const { data } = await db.auth.getUser();
+  if (data.user) await loadProfile(data.user);
+};
 
-function choosePlan(plan){
-  alert("You selected the " + plan + " plan. Secure payment setup will be connected later. No payment has been taken.");
-}
+logoutButton.onclick = async () => {
+  await db.auth.signOut();
+  await checkSession();
+};
 
-updateCredits();
+db.auth.onAuthStateChange((event, session) => {
+  if (event === "SIGNED_IN" && session) {
+    loadProfile(session.user);
+  }
+  if (event === "SIGNED_OUT") {
+    checkSession();
+  }
+});
+
+checkSession();
 </script>
 </body>
 </html>
-
