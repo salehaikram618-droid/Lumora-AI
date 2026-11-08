@@ -4,238 +4,174 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lumora AI</title>
+<title>Lumora AI - Video Creator</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#f7f5ff;color:#29213e;font-family:Arial,sans-serif}
-header{background:white;padding:20px 7%;display:flex;justify-content:space-between;align-items:center}
-.logo{font-size:27px;font-weight:bold;color:#7655d9}
-main{max-width:850px;margin:45px auto;padding:0 20px}
-.card{background:white;border-radius:20px;padding:28px;margin-bottom:22px;box-shadow:0 8px 30px #39266b0d}
-h1{text-align:center;font-size:38px}
-.subtitle{text-align:center;color:#817995}
-input,textarea,select{width:100%;padding:14px;margin:9px 0 16px;border:1px solid #ddd6ee;border-radius:10px;font-size:15px}
-button{padding:14px 20px;border:0;border-radius:10px;background:#7859dc;color:white;font-weight:bold;cursor:pointer}
+body{margin:0;font-family:Arial,sans-serif;background:#f3efff;color:#30264a}
+header{padding:22px 7%;background:#fff;display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:25px;font-weight:bold;color:#7955c8}
+main{max-width:850px;margin:45px auto;padding:25px}
+.card{background:white;padding:28px;border-radius:20px;box-shadow:0 8px 30px #4c36721a;margin-bottom:20px}
+h1{font-size:34px;margin-bottom:8px}
+p{color:#766d88;line-height:1.5}
+input,textarea,select{width:100%;padding:13px;margin:8px 0 17px;border:1px solid #ddd4ee;border-radius:10px;font-size:15px}
+textarea{min-height:120px;resize:vertical}
+button{border:0;border-radius:10px;padding:13px 20px;background:#7955c8;color:white;font-size:15px;cursor:pointer;margin:5px 5px 5px 0}
 button:disabled{opacity:.5;cursor:not-allowed}
-.full{width:100%}
-.secondary{background:#eee8ff;color:#6949c9}
-.hidden{display:none}
-.balance{background:#eee8ff;color:#6949c9;padding:15px;border-radius:12px;font-size:20px;font-weight:bold}
-.message{padding:12px;background:#f3efff;border-radius:10px;margin-top:15px}
-.small{font-size:13px;color:#827b91}
-.tabs{display:flex;gap:10px;margin-bottom:15px}
+.secondary{background:#eee8fa;color:#563a91}
+#app{display:none}
+#message{padding:12px;background:#f4f0fc;border-radius:10px;overflow-wrap:anywhere}
+small{color:#8a8199}
 </style>
 </head>
 <body>
-
 <header>
-  <div class="logo">✦ Lumora AI</div>
-  <button id="logout" class="secondary hidden">Log out</button>
+<div class="logo">✦ Lumora AI</div>
+<button class="secondary" id="logout" style="display:none">Log out</button>
 </header>
 
 <main>
-  <h1>Your ideas. Your videos. ✨</h1>
-  <p class="subtitle">Create something amazing with Lumora AI.</p>
+<section class="card" id="auth">
+<h1>Welcome to Lumora AI</h1>
+<p>Sign in or create an account to start making videos.</p>
+<label>Email</label>
+<input id="email" type="email" placeholder="Your email">
+<label>Password</label>
+<input id="password" type="password" placeholder="Your password">
+<button id="signup">Create account</button>
+<button class="secondary" id="login">Sign in</button>
+<p id="authMessage"></p>
+</section>
 
-  <section id="authArea" class="card">
-    <div class="tabs">
-      <button id="showLogin" class="secondary">Log in</button>
-      <button id="showSignup">Sign up</button>
-    </div>
+<section class="card" id="app">
+<h1>Create your video ✨</h1>
+<p>Describe the video you want Lumora AI to create.</p>
 
-    <h2 id="authTitle">Welcome back!</h2>
+<label>Video prompt</label>
+<textarea id="prompt" maxlength="10000" placeholder="Describe your video scene..."></textarea>
 
-    <form id="authForm">
-      <label>Email address</label>
-      <input id="email" type="email" placeholder="Enter your email" required>
+<label>Visual style</label>
+<select id="style">
+<option>Realistic</option>
+<option>Cinematic</option>
+<option>Business advertisement</option>
+<option>Educational</option>
+<option>Islamic reminder</option>
+<option>Social media</option>
+<option>Animated</option>
+</select>
 
-      <label>Password</label>
-      <input id="password" type="password" placeholder="Enter your password" minlength="6" required>
+<label>Video length</label>
+<select id="duration">
+<option value="5">5 seconds</option>
+<option value="8">8 seconds</option>
+<option value="10">10 seconds</option>
+</select>
 
-      <button id="authButton" class="full">Log in</button>
-    </form>
-    <div id="authMessage" class="message hidden"></div>
-    <p class="small">Your account and credit balance are stored securely in your Lumora database.</p>
-  </section>
+<label>Video format</label>
+<select id="ratio">
+<option value="1280:720">Landscape (16:9)</option>
+<option value="720:1280">Portrait (9:16)</option>
+</select>
 
-  <section id="dashboard" class="hidden">
-    <div class="card">
-      <h2>Your Lumora account</h2>
-      <p id="welcome"></p>
-      <div class="balance">✦ <span id="credits">--</span> credits available</div>
-      <p class="small">New customers receive 30 free credits.</p>
-      <button id="refresh" class="secondary">Refresh balance</button>
-    </div>
-
-    <div class="card">
-      <h2>Create a video</h2>
-      <label>Describe your video idea</label>
-      <textarea id="prompt" rows="5" placeholder="Describe the video you want to create..."></textarea>
-
-      <label>Video style</label>
-      <select id="style">
-        <option>Cinematic</option>
-        <option>Realistic</option>
-        <option>Animated</option>
-        <option>Business advertisement</option>
-        <option>Educational</option>
-        <option>Islamic reminder</option>
-        <option>Social media</option>
-      </select>
-
-      <p class="small">Video generation is being connected. Your credits will not be charged during this setup.</p>
-      <button class="full" disabled>AI video generation coming soon</button>
-    </div>
-
-    <div id="dashboardMessage" class="message hidden"></div>
-  </section>
+<button id="generate">Generate video</button>
+<div id="message">Your video task information will appear here.</div>
+<small>This starts a Runway generation task. The MP4 download feature is not connected yet.</small>
+</section>
 </main>
 
 <script>
 const SUPABASE_URL = "https://mlvbspwzwvynpremehel.supabase.co";
-const SUPABASE_KEY = "sb_publishable_-oc4IXGH5eEjyom6MgJTjQ_J0rQPhaZ";
+const SUPABASE_KEY = sb_publishable_-oc4IXGH5eEjyom6MgJTjQ_J0rQPhaZ
 
-const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const client = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
 
-let signupMode = false;
-
-const authArea = document.getElementById("authArea");
-const dashboard = document.getElementById("dashboard");
+const authBox = document.getElementById("auth");
+const appBox = document.getElementById("app");
 const authMessage = document.getElementById("authMessage");
-const dashboardMessage = document.getElementById("dashboardMessage");
+const message = document.getElementById("message");
 const logoutButton = document.getElementById("logout");
 
-function showMessage(element, message) {
-  element.textContent = message;
-  element.classList.remove("hidden");
+async function refreshSession() {
+  const { data: { session } } = await client.auth.getSession();
+  authBox.style.display = session ? "none" : "block";
+  appBox.style.display = session ? "block" : "none";
+  logoutButton.style.display = session ? "block" : "none";
 }
 
-function hideMessage(element) {
-  element.classList.add("hidden");
-}
-
-function setMode(signup) {
-  signupMode = signup;
-  document.getElementById("authTitle").textContent =
-    signup ? "Create your account" : "Welcome back!";
-  document.getElementById("authButton").textContent =
-    signup ? "Create account" : "Log in";
-  document.getElementById("showSignup").className =
-    signup ? "" : "secondary";
-  document.getElementById("showLogin").className =
-    signup ? "secondary" : "";
-  hideMessage(authMessage);
-}
-
-document.getElementById("showLogin").onclick = () => setMode(false);
-document.getElementById("showSignup").onclick = () => setMode(true);
-
-async function loadProfile(user) {
-  authArea.classList.add("hidden");
-  dashboard.classList.remove("hidden");
-  logoutButton.classList.remove("hidden");
-
-  document.getElementById("welcome").textContent =
-    "Signed in as " + user.email;
-
-  hideMessage(dashboardMessage);
-
-  const { data, error } = await db
-    .from("profiles")
-    .select("credits")
-    .eq("id", user.id)
-    .single();
-
-  if (error) {
-    document.getElementById("credits").textContent = "--";
-    showMessage(dashboardMessage,
-      "We couldn't load your credits yet. Please refresh or contact support.");
-    return;
-  }
-
-  document.getElementById("credits").textContent = data.credits;
-}
-
-async function checkSession() {
-  const { data, error } = await db.auth.getSession();
-  if (error) {
-    showMessage(authMessage, error.message);
-    return;
-  }
-
-  if (data.session) {
-    await loadProfile(data.session.user);
-  } else {
-    authArea.classList.remove("hidden");
-    dashboard.classList.add("hidden");
-    logoutButton.classList.add("hidden");
-  }
-}
-
-document.getElementById("authForm").addEventListener("submit", async (event) => {
-  event.preventDefault();
-
+document.getElementById("signup").onclick = async () => {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
-  const button = document.getElementById("authButton");
 
-  button.disabled = true;
-  button.textContent = "Please wait...";
-  hideMessage(authMessage);
+  const { error } = await client.auth.signUp({ email, password });
+  authMessage.textContent = error ? error.message :
+    "Account request sent. Check your email if confirmation is required.";
+};
 
-  try {
-    if (signupMode) {
-      const { data, error } = await db.auth.signUp({
-        email,
-        password
-      });
+document.getElementById("login").onclick = async () => {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
 
-      if (error) throw error;
-
-      if (data.session) {
-        await loadProfile(data.session.user);
-      } else {
-        showMessage(authMessage,
-          "Account created! Please check your email to confirm your account, then log in.");
-      }
-    } else {
-      const { data, error } = await db.auth.signInWithPassword({
-        email,
-        password
-      });
-
-      if (error) throw error;
-      await loadProfile(data.user);
-    }
-  } catch (error) {
-    showMessage(authMessage, error.message);
-  } finally {
-    button.disabled = false;
-    button.textContent = signupMode ? "Create account" : "Log in";
-  }
-});
-
-document.getElementById("refresh").onclick = async () => {
-  const { data } = await db.auth.getUser();
-  if (data.user) await loadProfile(data.user);
+  const { error } = await client.auth.signInWithPassword({ email, password });
+  authMessage.textContent = error ? error.message : "Signed in!";
+  await refreshSession();
 };
 
 logoutButton.onclick = async () => {
-  await db.auth.signOut();
-  await checkSession();
+  await client.auth.signOut();
+  await refreshSession();
 };
 
-db.auth.onAuthStateChange((event, session) => {
-  if (event === "SIGNED_IN" && session) {
-    loadProfile(session.user);
+document.getElementById("generate").onclick = async () => {
+  const prompt = document.getElementById("prompt").value.trim();
+  const duration = Number(document.getElementById("duration").value);
+  const aspectRatio = document.getElementById("ratio").value;
+  const style = document.getElementById("style").value;
+  const button = document.getElementById("generate");
+
+  if (!prompt) {
+    message.textContent = "Please enter a video description.";
+    return;
   }
-  if (event === "SIGNED_OUT") {
-    checkSession();
+
+  button.disabled = true;
+  message.textContent = "Sending your video request to Runway...";
+
+  try {
+    const { data, error } = await client.functions.invoke(
+      "generate-video",
+      {
+        body: { prompt, duration, aspectRatio, style }
+      }
+    );
+
+    if (error) throw error;
+
+    if (!data || !data.taskId) {
+      throw new Error("No video task ID was returned.");
+    }
+
+    message.textContent =
+      "Video task started! Task ID: " + data.taskId +
+      ". Status: " + (data.status || "Submitted");
+
+  } catch (error) {
+    message.textContent = "Could not start video: " +
+      (error.message || "Please try again.");
+  } finally {
+    button.disabled = false;
   }
+};
+
+client.auth.onAuthStateChange(() => {
+  refreshSession();
 });
 
-checkSession();
+refreshSession();
 </script>
 </body>
 </html>
